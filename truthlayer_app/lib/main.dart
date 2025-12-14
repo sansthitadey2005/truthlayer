@@ -1,5 +1,3 @@
-import 'screens/login_screen.dart';
-import 'screens/register_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -75,10 +73,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  );
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurpleAccent,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -101,8 +96,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () {Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const RegisterScreen()),);},
+                  onPressed: () {},
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.blueAccent),
                     padding: const EdgeInsets.symmetric(vertical: 14),
