@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    match /evidence/{evidenceId} {
+
+      // Only logged-in users can create evidence
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid;
+
+      // Only owner can read
+      allow read: if request.auth != null
+        && request.auth.uid == resource.data.ownerId;
+
+      // Nobody can edit or delete
+      allow update, delete: if false;
+    }
+  }
+}
+
+
+
