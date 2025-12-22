@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TruthLayer</title>
+</head>
+
+<body>
+
+  <h1>TruthLayer is Working ✅</h1>
+  <p>Hello from VS Code</p>
+
+  <!-- LINK INPUT -->
+  <input id="linkInput" placeholder="Paste a link here" />
+  <button id="submitBtn">Submit</button>
+  <button id="autopsyBtn">Run Link Autopsy</button>
+
+  <hr>
+
+  <!-- EMAIL AUTOPSY -->
+  <h3>Email Autopsy</h3>
+  <textarea id="emailInput" placeholder="Paste email content here"></textarea>
+  <br>
+  <button id="emailAutopsyBtn">Run Email Autopsy</button>
+
+  <hr>
+
+  <!-- OFFER / SMS AUTOPSY -->
+  <h3>Offer / SMS Autopsy</h3>
+  <textarea id="offerInput" placeholder="Paste offer / SMS text here"></textarea>
+  <br>
+  <button id="offerAutopsyBtn">Run Offer Autopsy</button>
+
+  <script type="module">
+    // =========================
+    // FIREBASE IMPORTS
+    // =========================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp,
+      getDocs,
+      query,
+      orderBy,
+      limit,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // =========================
+    // FIREBASE CONFIG
+    // =========================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqnrltsLxes0eLmjBr1zgPaDWoRzqghj8",
+      authDomain: "truthlayer-c06ef.firebaseapp.com",
+      projectId: "truthlayer-c06ef",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    signInAnonymously(auth).catch(console.error);
+
+    // =========================
+    // MAIN LOGIC
+    // =========================
+    onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+
+      const linkInput = document.getElementById("linkInput");
+      const submitBtn = document.getElementById("submitBtn");
+      const autopsyBtn = document.getElementById("autopsyBtn");
+
+      const emailInput = document.getElementById("emailInput");
+      const emailBtn = document.getElementById("emailAutopsyBtn");
+
+      const offerInput = document.getElementById("offerInput");
+      const offerBtn = document.getElementById("offerAutopsyBtn");
+
+      // =========================
+      // STEP 3.5 — SAVE LINK EVIDENCE
+      // =========================
+      submitBtn.addEventListener("click", async () => {
+        const userLink = linkInput.value.trim();
+        if (!userLink) return alert("Paste a link");
+
+        let cleanedLink = userLink.toLowerCase()
+          .replace("https://", "")
+          .replace("http://", "")
+          .replace(/\/$/, "");
+
+        const domain = cleanedLink.split("/")[0];
+
+        await addDoc(collection(db, "evidence"), {
+          type: "link",
+          rawInput: userLink,
+          normalized: {
+            canonical: cleanedLink,
+            domain: domain,
+            metadata: {}
+          },
+          ownerId: user.uid,
+          status: "ingested",
+          createdAt: serverTimestamp()
+        });
+
+        alert("Evidence saved");
+        linkInput.value = "";
+      });
+
+      // =========================
+      // STEP 4A — LINK AUTOPSY
+      // =========================
+      autopsyBtn.addEventListener("click", async () => {
+        alert("Autopsy started");
+
+        const q = query(
+          collection(db, "evidence"),
+          where("ownerId", "==", user.uid),
+          orderBy("createdAt", "desc"),
+          limit(1)
+        );
+
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) return alert("No evidence found");
+
+        const docSnap = snapshot.docs[0];
+        const evidence = docSnap.data();
+
+        const riskFlags = [];
+
+        if (!evidence.rawInput.startsWith("https://")) riskFlags.push("NO_HTTPS");
+        if (evidence.normalized.domain.length > 20) riskFlags.push("LONG_DOMAIN");
+        if (/\d/.test(evidence.normalized.domain)) riskFlags.push("NUMERIC_DOMAIN");
+
+        await addDoc(collection(db, "autopsies"), {
+          evidenceId: docSnap.id,
+          type: "link",
+          findings: {
+            domain: evidence.normalized.domain,
+            riskFlags
+          },
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        });
+
+        alert("Link autopsy completed");
+      });
+
+      // =========================
+      // STEP 4B — EMAIL AUTOPSY
+      // =========================
+      emailBtn.addEventListener("click", async () => {
+        const text = emailInput.value.toLowerCase();
+        if (!text) return alert("Paste email content");
+
+        const keywords = [
+          "urgent",
+          "verify",
+          "account suspended",
+          "click here",
+          "password",
+          "login immediately"
+        ];
+
+        const flags = keywords.filter(k => text.includes(k));
+
+        await addDoc(collection(db, "autopsies"), {
+          type: "email",
+          rawText: emailInput.value,
+          findings: { suspiciousWords: flags },
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        });
+
+        alert("Email autopsy completed");
+        emailInput.value = "";
+      });
+
+      // =========================
+      // STEP 4C — OFFER / SMS AUTOPSY
+      // =========================
+      offerBtn.addEventListener("click", async () => {
+        const text = offerInput.value.toLowerCase();
+        if (!text) return alert("Paste offer text");
+
+        const flags = [];
+
+        if (["limited time","hurry","act now","expires"].some(w => text.includes(w)))
+          flags.push("URGENCY_PRESSURE");
+
+        if (["congratulations","you won","free","reward","gift"].some(w => text.includes(w)))
+          flags.push("REWARD_BAIT");
+
+        if (["pay","upi","₹","rs","processing fee"].some(w => text.includes(w)))
+          flags.push("PAYMENT_MANIPULATION");
+
+        await addDoc(collection(db, "autopsies"), {
+          type: "offer",
+          rawText: offerInput.value,
+          findings: { riskFlags: flags },
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        });
+
+        alert("Offer/SMS autopsy completed");
+        offerInput.value = "";
+      });
+    });
+  </script>
+
+</body>
+</html>
