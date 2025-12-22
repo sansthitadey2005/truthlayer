@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 
 void main() {
   runApp(const TruthLayerApp());
@@ -58,7 +60,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               // 🔮 APP TITLE
               const Text(
-                'TruthLayer',
+                'TruthLayer', 
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -73,7 +75,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {Navigator.push(context,MaterialPageRoute(builder: (context) => const LoginScreen()),);},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurpleAccent,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -96,7 +98,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {Navigator.push(context,MaterialPageRoute(builder: (context) => const RegisterScreen()),);},
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.blueAccent),
                     padding: const EdgeInsets.symmetric(vertical: 14),
