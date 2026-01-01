@@ -1,3 +1,4 @@
+import 'home_screen.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -54,16 +55,23 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                ),
-                child: const Text(
-                  'Login',
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
+             ElevatedButton(
+  onPressed: () {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomeScreen(),
+      ),
+    );
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.deepPurple,
+  ),
+  child: const Text(
+    'Login',
+    style: TextStyle(color: Colors.black),
+  ),
+),
             ],
           ),
         ),
