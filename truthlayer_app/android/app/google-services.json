@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "597935266182",
+    "project_id": "truthlayer-c06ef",
+    "storage_bucket": "truthlayer-c06ef.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:597935266182:android:3b274f7dceff12de5c7407",
+        "android_client_info": {
+          "package_name": "com.example.truthlayer_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZmHz9UIhgmLwLbMiG0fMst3hKNzI1Aqo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
