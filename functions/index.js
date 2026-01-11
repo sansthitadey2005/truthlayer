@@ -1,43 +1,57 @@
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
+// =========================
+// FRONTEND SCAM DETECTOR
+// =========================
 
-admin.initializeApp();
+const scamPatterns = [
+  "urgent",
+  "account has been suspended",
+  "verify your password",
+  "click here",
+  "immediately",
+  "login",
+  "password",
+  "free",
+  "gift",
+  "winner",
+  "upi",
+  "pay",
+  "processing fee"
+];
 
-// 🔐 AUTH-PROTECTED FUNCTION
-exports.linkAutopsy = functions.https.onCall(async (data, context) => {
-  // ❌ If not logged in
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "User must be logged in"
-    );
-  }
+function analyzeText(text) {
+  const t = text.toLowerCase();
+  let hits = [];
 
-  const uid = context.auth.uid;
-  const link = data.link;
-
-  if (!link) {
-    throw new functions.https.HttpsError(
-      "invalid-argument",
-      "Link is required"
-    );
-  }
-
-  // 🧠 Simple autopsy logic
-  const riskFlags = [];
-
-  if (!link.startsWith("https://")) {
-    riskFlags.push("NO_HTTPS");
-  }
-
-  if (link.length > 60) {
-    riskFlags.push("LONG_URL");
-  }
+  scamPatterns.forEach(p => {
+    if (t.includes(p)) hits.push(p);
+  });
 
   return {
-    uid,
-    link,
-    riskFlags,
-    verdict: riskFlags.length ? "suspicious" : "clean"
+    isScam: hits.length >= 2,
+    hits
   };
+}
+
+document.getElementById("submitEvidence").addEventListener("click", () => {
+  const input = document.getElementById("evidenceInput").value.trim();
+  const result = document.getElementById("result");
+
+  if (!input) {
+    result.innerText = "⚠️ Please paste something";
+    result.style.color = "orange";
+    return;
+  }
+
+  const analysis = analyzeText(input);
+
+  if (analysis.isScam) {
+    result.innerHTML =
+      "❌ <b>Likely Scam</b><br><small>Detected: " +
+      analysis.hits.join(", ") +
+      "</small>";
+    result.style.color = "red";
+  } else {
+    result.innerHTML = "✅ <b>Likely Safe</b>";
+    result.style.color = "green";
+  }
 });
