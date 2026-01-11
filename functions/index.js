@@ -37,7 +37,7 @@ document.getElementById("submitEvidence").addEventListener("click", () => {
   const result = document.getElementById("result");
 
   if (!input) {
-    result.innerText = "⚠️ Please paste something";
+    result.innerText = "Please paste something";
     result.style.color = "orange";
     return;
   }
@@ -46,12 +46,12 @@ document.getElementById("submitEvidence").addEventListener("click", () => {
 
   if (analysis.isScam) {
     result.innerHTML =
-      "❌ <b>Likely Scam</b><br><small>Detected: " +
+      " <b>Likely Scam</b><br><small>Detected: " +
       analysis.hits.join(", ") +
       "</small>";
     result.style.color = "red";
   } else {
-    result.innerHTML = "✅ <b>Likely Safe</b>";
+    result.innerHTML = "<b>Likely Safe</b>";
     result.style.color = "green";
   }
 });
